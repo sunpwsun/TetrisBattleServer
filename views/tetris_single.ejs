@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Single Tetris</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font: 13px Helvetica, Arial; }
+            form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+            form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+            form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+            #messages { list-style-type: none; margin: 0; padding: 0; }
+            #messages li { padding: 5px 10px; }
+            #messages li:nth-child(odd) { background: #eee; }
+
+            .container { display: flex; justify-content: center; align-items: center; }
+        </style>
+        <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+        <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+        <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+          
+        <script src="/socket.io/socket.io.js"></script>
+        <script type="text/javascript" src="tetris_single_variables.js"></script>
+        <script type="text/javascript" src="tetris_single.js"></script>
+        
+        <script>
+
+            
+            function changeTetrisVar() {
+
+                this.numOfX = $('#x_length').val();               
+                this.level = parseInt( $("input[name='level']:checked").attr("value") );
+                initCells();
+                
+                var c = document.getElementById('tetris');             
+                c.width = mySquareLen * $('#x_length').val() + 220;
+                c.height = mySquareLen * (numOfY - 4) + 85;
+                //alert(c.height + ' ' + c.width + ' , ' + numOfX + ' , ' + numOfY);
+
+                gameOver = false;
+
+                gameInit();
+            }
+
+
+        </script>
+    </head>
+    <body>
+        
+
+        <!-- Create new battle -->
+        <div data-role="page" id="new_battle" theme="a">
+
+            <h2>Make your own Tetris</h2>
+
+                <fieldset data-role="controlgroup" data-type="horizontal">
+                    <legend>Level</legend>
+                    <input checked  type="radio" name="level" id="easy"    value="0">
+                        <label for="easy">Easy</label>
+                    <input          type="radio" name="level" id="normal" value="1">
+                        <label for="normal">Normal</label>
+                    <input          type="radio" name="level" id="difficult"   value="2">
+                        <label for="difficult">Difficult</label>
+                </fieldset>
+
+                <fieldset>
+                        <div data-role="rangeslider">
+                                <label for="range1"><em>Width:</em></label>
+                                <input type="range" name="x_length" id="x_length" 
+                                                min="10" max="40" value="10"
+                                                data-show-value="true"
+                                                data-popup-enabled="true">
+                                <!-- Add extra labels -->
+                        </div>
+        
+                </fieldset>
+                   
+           
+            <ul>
+                <li id="startTetris"><a href="#start_tetris">Start Tetris</a></li>
+            </ul>
+            <script>
+                    $("#startTetris").click( ()=>{
+                       
+                        changeTetrisVar();
+                    } );
+                </script>
+    
+        </div>
+
+
+
+<!-- start tetris game -->
+        <div data-role="page" id="start_tetris">
+            <h2>Enjoy!!</h2>
+            <div class="container">
+                <canvas id="tetris" width="950" height="730" ></canvas>
+            </div>
+
+        </div>
+        <div style="display:none;" >
+            <img id="Brick0" src="images/brick00.png" alt=""/>
+            <img id="Brick1" src="images/brick01.png" alt=""/>
+            <img id="Brick2" src="images/brick02.png" alt=""/>
+            <img id="Brick3" src="images/brick03.png" alt=""/>
+            <img id="Brick4" src="images/brick04.png" alt=""/>
+            <img id="Brick5" src="images/brick05.png" alt=""/>
+            <img id="Brick6" src="images/brick06.png" alt=""/>
+            <img id="Brick7" src="images/brick07.png" alt=""/>
+            <img id="Brick8" src="images/brick08.png" alt=""/>
+            <img id="Brick9" src="images/brick09.png" alt=""/>
+            <img id="Brick10" src="images/brick10.png" alt=""/>
+            <img id="Brick11" src="images/brick11.png" alt=""/>
+            <img id="Brick12" src="images/brick12.png" alt=""/>
+            <img id="imgBg" src="images/TetrisBg.png" alt=""/>
+            <img id="imgPanel" src="images/TetrisPanel.png" alt=""/>
+            <img id="imgNamePanel" src="images/nameBg.png" alt=""/>
+            <img id="imgScorePanel" src="images/tetris_single_score.png" alt=""/>
+            
+
+        </div>
+
+    </body>
+</html>
+ 

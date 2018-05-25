@@ -1,0 +1,25 @@
+{
+  "name": "03.express",
+  "version": "1.0.0",
+  "description": "",
+  "main": "ex.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "ec2metadata": "^0.1.0",
+    "ejs": "^2.5.7",
+    "express": "^4.16.2",
+    "express-session": "^1.15.6",
+    "fs": "0.0.1-security",
+    "mongodb": "^3.1.0-beta4",
+    "mongoose": "^5.1.2",
+    "npm": "^6.0.0",
+    "redis": "^2.8.0",
+    "sequelize": "^4.37.6",
+    "socket.io": "^2.0.4"
+  }
+}

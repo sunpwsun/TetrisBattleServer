@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Online Battle Tetris</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font: 13px Helvetica, Arial; }
+            form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+            form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+            form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+            #messages { list-style-type: none; margin: 0; padding: 0; }
+            #messages li { padding: 5px 10px; }
+            #messages li:nth-child(odd) { background: #eee; }
+
+            .container { display: flex; justify-content: center; align-items: center; }
+            h2{text-align: center; }
+
+            div.ui-input-text { width: 20% ; min-width: 100px !important }
+        </style>
+        <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+        <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+        <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+          
+        <script src="/socket.io/socket.io.js"></script>
+        <script type="text/javascript" src="tetris_variables.js"></script>
+        <script type="text/javascript" src="tetris_battle.js"></script>   
+        <script>
+
+            var startBattle = false;
+            var socket;
+            var opponentCells;
+            $(()=>{
+              
+                socket = io.connect('', {
+                    query: {
+                        name : '<%= userid %>', 
+                        from : '<%= from %>'
+                    },
+                    forceNew : false
+                });
+            
+
+                socket.on('chat message', (msg)=>{
+                    $('#messages').append($('<li>').text(msg));
+                });
+
+
+                socket.on('game:tetris', (msg)=>{
+
+                    oppoName = msg.sender;
+
+                    if( msg.command === 'cells' ) {
+                        opponentCells = msg.cells;
+                        drawAll();                 
+                    }
+                    else if( msg.command === 'lost' ) {
+
+                        // opponent won, I lost
+                        gameOver = true;
+                        gameRunning = false;
+                        timerRunning = false;
+                        won = true;
+
+                        try {
+                            clearInterval( gameTimer );
+                        }
+                        catch( Exception ) {
+                        }
+
+                        drawAll();
+                    }
+                    else if( msg.command === 'attack' ) {
+
+                        // opponent attacks me
+                        console.log('attack : ' + lines);
+                        var lines = msg.lines - 1;
+
+                        for( var y = 0 ; y < lines ; y++ ) {   		
+                            for( var x = 0 ; x < numOfX ; x++ ) {
+                                
+                                if( cells[ x ][ y ] > -1 ) {
+                                    console.log( "Game OVer 1" );	                            				
+                                    // game over
+                                    // I lost
+                                }
+                            }
+                        }
+                        
+                        
+                        for( var y = lines ; y < numOfY  ; y++ ) {	            
+                            for( var x = 0 ; x < numOfX ; x++ ) {
+                        
+                                cells[ x ][ y - lines ] = cells[ x ][ y ];
+                            }
+                        }
+                        
+                        for(var y = numOfY - lines ; y < numOfY ; y++ ) {
+                            for( var x = 0 ; x < numOfX ; x++ ) {
+                    
+                                cells[ x ][ y ] = 12;		// Color.BLUE                          			
+                            }
+                            
+                            //nextBricksType[ 1 ] = next[ level ][ Math.floor(  Math.random() * next[ level ].length ) ];
+                            var randX =  Math.floor( Math.random() * numOfX );
+                            cells[ randX ][ y ] = -1;
+                        }
+                        drawAll(); 
+                    }
+
+                });
+
+                socket.on('game:tetris:battleRoomList', (rooms)=>{
+                    console.log("game:tetris:battleRoomList - " + rooms.length) ;                 
+                    for( var i = 0 ; i < rooms.length ; i++ ) {
+                       
+                        var level_temp = 'Difficult';
+                        if( rooms[i].level === '0')
+                            level_temp = 'Easy';
+                        else if( rooms[i].level === '1')
+                            level_temp = 'Normal';
+
+
+                        $('#waiting_list').append( '<li li-id="' + rooms[i].roomID + '" id="' + rooms[i].name + rooms[i].level +
+                                                '"><a href="#start_battle">' + rooms[i].name + 
+                                                ', level : ' + level_temp +
+                                                '</a></li>');
+                    }
+                });
+
+                socket.on('game:tetris:startBattle', ()=> {
+                
+                    startBattle = true;
+                    console.log("start battle");                    
+                });
+            });
+
+
+            function createBattle_Join() {
+
+                myName = '<%= userid %>';
+               console.log("myName = " + myName); 
+                var packet = {
+                    sender : '<%= userid %>',
+                    receiver : '',
+                    type1 : 'game',
+                    type2 : 'tetris',
+                    command : 'createBattle'
+                };
+                packet.battle_name = $('#battle_name').val();
+                packet.level = $("input[type='radio'][name='level']:checked").val();
+                packet.x = $('#x_length').val();
+                packet.y = $('#y_length').val();
+
+                //socket.emit('game:tetris', packet);
+                socket.emit('game:tetris:createBattle', packet);
+                console.log("createBattle_Join()");
+               // window.location.replace('/tetris_battle');
+            }
+
+
+            $(document).ready(function() {
+
+               
+
+                $("input[name='level']").on("change", function() {
+                    if ($("input[name='level']:checked").val() === '0') {
+                        $("#difficulty").attr('src', 'images/easy.png');
+                        $("#difficulty").attr('alt', 'Easy');         
+                    }
+                    else if ($("input[name='level']:checked").val() === '1') {
+                        $("#difficulty").attr('src', 'images/normal.png');
+                        $("#difficulty").attr('alt', 'Normal');               
+                    }
+                    else {
+                        $("#difficulty").attr('src', 'images/difficult.png');
+                        $("#difficulty").attr('alt', 'Difficult');  
+                    }
+                });
+            });
+
+
+        </script>
+
+        
+    </head>
+    <body>
+        
+        <div style="display:none;" >
+            <img id="Brick0" src="images/brick00.png" alt=""/>
+            <img id="Brick1" src="images/brick01.png" alt=""/>
+            <img id="Brick2" src="images/brick02.png" alt=""/>
+            <img id="Brick3" src="images/brick03.png" alt=""/>
+            <img id="Brick4" src="images/brick04.png" alt=""/>
+            <img id="Brick5" src="images/brick05.png" alt=""/>
+            <img id="Brick6" src="images/brick06.png" alt=""/>
+            <img id="Brick7" src="images/brick07.png" alt=""/>
+            <img id="Brick8" src="images/brick08.png" alt=""/>
+            <img id="Brick9" src="images/brick09.png" alt=""/>
+            <img id="Brick10" src="images/brick10.png" alt=""/>
+            <img id="Brick11" src="images/brick11.png" alt=""/>
+            <img id="Brick12" src="images/brick12.png" alt=""/>
+            <img id="imgBg" src="images/TetrisBg.png" alt=""/>
+            <img id="imgPanel" src="images/TetrisPanel.png" alt=""/>
+            <img id="imgNamePanel" src="images/nameBg.png" alt=""/>
+            
+
+        </div>
+
+        <!-- Waiting List -->
+        <div data-role="page" id="waiting_list_page">
+            <div align="center"></div>
+                <header data-role="header"><h1 id="welcome" class="ui-title">Welcome</h1></header>
+            <!--
+                <h1><p>Welocome <%= userid %>,  <%= from %></p></h1>
+            -->
+                <hr>
+                <header data-role="header"><h2 class="ui-title">Waiting List</h2></header>
+                
+                <div class="ui-content" role="main">
+                    <ul id="waiting_list" data-role="listview" data-inset="true"></ul>
+                </div>
+                <hr>
+                <li><a href="#new_battle">Create New Battle</a></li>
+            </div>
+        </div>
+        <script>
+/*
+            $(document).on("pagecreate", "#waiting_list_page", function() {
+    console.log(localStorage.getItem("userid") )    ;        
+                $("#welcome").html("Welcome " + localStorage.getItem("userid") );
+            });
+*/
+
+            $(document).on("click", "ul#waiting_list >li", function() {
+                var rowID = $(this).closest("li").attr("li-id");
+                console.log( "A : " + rowID );
+                myName = '<%= userid %>';
+                socket.emit( 'game:tetris:joinRoom', rowID );
+
+                $('#gameRoomName').html('');
+                $('#gameRoomName').html( 'BATTLE NAME : ' + $(this).closest("li").attr('id').substring( 0, $(this).closest("li").attr('id').length - 1 ) );
+                var str = $(this).closest("li").attr('id');
+                level = parseInt( str.substring( str.length - 1, str.length ) );
+             
+
+                initCells();
+                gameInit();
+                clearScreen();
+            });
+        </script>
+
+
+        <!-- Create new battle -->
+        <div data-role="page" id="new_battle" theme="a" >
+            <div align="center">
+            <h2>Make Your Own Battle Room</h2>
+                <br>
+           
+                <fieldset data-role="controlgroup" >
+                    <legend><b>BATTLE NAME</b></legend>
+                    
+                        <input type="text" id="battle_name" required >		
+                </fieldset>
+           
+                <br>
+                
+                <fieldset data-role="controlgroup" data-type="horizontal">
+                    <legend><b>LEVEL</b></legend>
+                    <input checked  type="radio" name="level" id="easy"    value="0">
+                        <label for="easy">EASY</label>
+                    <input          type="radio" name="level" id="normal" value="1">
+                        <label for="normal">NORMAL</label>
+                    <input          type="radio" name="level" id="difficult"   value="2">
+                        <label for="difficult">HARD</label>
+                </fieldset>
+                <p>
+                    <img id="difficulty" src="images/easy.png" alt="easy" height="300" >
+                </p>
+<!--
+                <fieldset>
+                        <label>Width</label>
+                        <input type="number" id="x_length" value="10" step="1" min="8" max="12" >
+                        <label>Height</label>
+                        <input type="number" id="y_length" value="20" step="1" min="16" max="24" >
+                </fieldset>
+            -->                
+           
+            <br><br>
+            <ul>
+                <li id="create_and_wait"><a href="#start_battle">Create and Wait</a></li>
+            </ul>
+
+
+        </div>
+
+            <script>
+                $("#create_and_wait").click( ()=>{
+console.log("create_and_wait");                   
+                    //create_and_wait = true;
+                    
+                    level = parseInt( $("input[name='level']:checked").attr("value") );
+
+                    initCells();
+                    gameInit();
+                    clearScreen();
+
+                    // notice to server 
+                    createBattle_Join();
+                 
+                    $('#gameRoomName').html('');
+                    $('#gameRoomName').html( 'BATTLE NAME : ' + $('#battle_name').val() );
+                } );
+            </script>
+    
+        </div>
+
+
+
+<!-- start tetris game -->
+        <div data-role="page" id="start_battle">
+        <h2 id="gameRoomName"></h2>
+            <div class="container">
+                <canvas id="tetris" width="950" height="730" ></canvas>
+            </div>     
+        </div>
+
+
+    </body>
+</html>
+ 

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Tetris</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script>
+            var socket;
+            var opponentCells;
+        </script>
+        
+    </head>
+    <body>
+        <h1>Welcome <%= userid %></h1>
+<!--      
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+-->
+        
+        <script>
+            $(()=>{
+                socket = io.connect('', {query:'name=<%= userid %>'});
+
+                $('form').submit(()=>{
+                    socket.emit('chat message', $('#m').val());
+                    $('#m').val('');
+                    return false;
+                });
+    
+                socket.on('chat message', (msg)=>{
+                    $('#messages').append($('<li>').text(msg));
+                });
+
+
+            });
+        </script>
+
+        <!-- write a code to show waiting users for tetris -->
+        <h2>Waiting users</h2>
+        
+        
+        
+        
+        
+        <hr>
+
+        <!-- write a code to show input form for a new battle room -->
+        <h2>Make your own battle room</h2>
+        <fieldset>
+            <form method="post" action="/">
+                <legend>Battle Information</legend>
+                <br>
+                <label>Battle Name</label><input type="text" id="room_name" >		
+                <br>
+                
+                <fieldset>
+                    <legend>Level</legend>
+                    <input checked  type="radio" name="level" value="low">Low
+                    <input          type="radio" name="level" value="medium">Medium
+                    <input          type="radio" name="level" value="high">High
+                </fieldset>
+                <br>
+                
+                <label>X length</label><input type="number" id="x_length" value="10" step="1" min="8" max="12" ><br>		
+                <br>
+                <label>Y length</label><input type="number" id="y_length" value="20" step="1" min="16" max="24" ><br>	
+                <br>
+                <input type="submit" value="Create and Wait"><br>
+            </form>
+        </fieldset>
+
+
+
+ 
+    </body>
+</html>
+ 
