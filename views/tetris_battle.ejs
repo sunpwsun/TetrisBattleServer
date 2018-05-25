@@ -113,20 +113,26 @@
                 });
 
                 socket.on('game:tetris:battleRoomList', (rooms)=>{
-                    console.log("game:tetris:battleRoomList - " + rooms.length) ;                 
-                    for( var i = 0 ; i < rooms.length ; i++ ) {
-                       
-                        var level_temp = 'Difficult';
-                        if( rooms[i].level === '0')
-                            level_temp = 'Easy';
-                        else if( rooms[i].level === '1')
-                            level_temp = 'Normal';
+                    console.log("game:tetris:battleRoomList - " + rooms.length) ; 
+                    
+                    if( rooms.length === 0 ) {
+                        $('#waiting_list').append( '<li>No battle room, You can make a battle.</li>');
+                    }
+                    else {
+                            for( var i = 0 ; i < rooms.length ; i++ ) {
+                        
+                            var level_temp = 'Difficult';
+                            if( rooms[i].level === '0')
+                                level_temp = 'Easy';
+                            else if( rooms[i].level === '1')
+                                level_temp = 'Normal';
 
 
-                        $('#waiting_list').append( '<li li-id="' + rooms[i].roomID + '" id="' + rooms[i].name + rooms[i].level +
-                                                '"><a href="#start_battle">' + rooms[i].name + 
-                                                ', level : ' + level_temp +
-                                                '</a></li>');
+                            $('#waiting_list').append( '<li li-id="' + rooms[i].roomID + '" id="' + rooms[i].name + rooms[i].level +
+                                                    '"><a href="#start_battle">' + rooms[i].name + 
+                                                    ', level : ' + level_temp +
+                                                    '</a></li>');
+                        }
                     }
                 });
 
@@ -212,12 +218,16 @@
         <!-- Waiting List -->
         <div data-role="page" id="waiting_list_page">
             <div align="center"></div>
+<!--
                 <header data-role="header"><h1 id="welcome" class="ui-title">Welcome</h1></header>
-            <!--
-                <h1><p>Welocome <%= userid %>,  <%= from %></p></h1>
-            -->
-                <hr>
                 <header data-role="header"><h2 class="ui-title">Waiting List</h2></header>
+    
+            -->
+                
+                <h1><div align="center">Welocome <%= userid %></div></h1>
+                <hr>
+                <h3><div align="center">Waiting List</div></h3>
+                <hr>
                 
                 <div class="ui-content" role="main">
                     <ul id="waiting_list" data-role="listview" data-inset="true"></ul>

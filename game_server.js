@@ -154,7 +154,7 @@ app.get( '/logout', (req,res)=> {
     }
 });
 
-app.get( '/login', (req,res)=> {
+app.post( '/login', (req,res)=> {
 
     var id = req.body.id;
     //var pw = req.body.password;
@@ -289,6 +289,16 @@ io.on('connection', function(socket) {
                 }
             }
         }
+
+        // send a lost message to opponent
+        var packet = {
+            sender : '',
+            receiver : '',
+            type1 : 'game',
+            type2 : 'tetris',
+            command : 'lost'
+        };
+        socket.broadcast.emit('game:tetris', packet);
 
 
     });
