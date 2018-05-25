@@ -1,7 +1,5 @@
 /*
  * Online Game Server
- * 2018.01.13 : initial version
- * 2018.05.10 : MongoDB added for logging
  * 2018.05.24 : still working 
  * Wirtten by Jinuk Sun
  */
@@ -54,8 +52,8 @@ app.use(expressSession({
 var router = express.Router();
 
 
+app.get( '/tetris_battle', (req,res)=>{
 
-router.route('/tetris_battle').get( (req,res)=>{
     log( '───────────────────────────────────────────────────────────────────');
     log( '           ◈ Routing : /tetris_battle');
 
@@ -79,7 +77,8 @@ router.route('/tetris_battle').get( (req,res)=>{
     }
 });
 
-router.route('/gamelist').get( (req,res)=>{
+app.get( '/gamelist', (req,res)=>{
+ 
     log( '           ◈ Routing : /gamelist ');
 
     if( req.session.user) {
@@ -99,7 +98,8 @@ router.route('/gamelist').get( (req,res)=>{
         res.redirect( '/login.html');
     }
 });
-router.route('/tetris_single').get( (req,res)=>{
+
+app.get( '/tetris_single',(req,res)=>{
 
     log( '───────────────────────────────────────────────────────────────────');
     log( '           ◈ Routing : /tetris_single ');
@@ -121,7 +121,8 @@ router.route('/tetris_single').get( (req,res)=>{
         res.redirect( '/login.html');
     }
 });
-router.route('/logout').get( (req,res)=>{
+
+app.get( '/logout', (req,res)=> {
 
     if( req.session.user) {
 
@@ -152,7 +153,8 @@ router.route('/logout').get( (req,res)=>{
         res.redirect( '/login.html');
     }
 });
-router.route('/login').post( (req,res)=> {
+
+app.get( '/login', (req,res)=> {
 
     var id = req.body.id;
     //var pw = req.body.password;
